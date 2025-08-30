@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="hi" manifest="manifest.json">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मजदूर प्रबंधन सिस्टम</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .app-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .login-form {
+            display: block;
+        }
+        
+        .login-form.hidden,
+        .main-app.hidden {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        input[type="tel"], input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="tel"]:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .worker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+        
+        .worker-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .daily-wage {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .attendance-row {
+            display: grid;
+            grid-template-columns: 80px 80px 100px 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .attendance-row:last-child {
+            border-bottom: none;
+        }
+        
+        .date-cell {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .attendance-input {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .expense-input {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .balance-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #38a169;
+        }
+        
+        .summary-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 10px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .summary-row:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2d3748;
+            border-top: 1px solid #cbd5e0;
+            padding-top: 8px;
+        }
+        
+        .payment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0fff4;
+            border-radius: 10px;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .payment-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #38a169;
+            background: white;
+            color: #38a169;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .payment-btn.active {
+            background: #38a169;
+            color: white;
+        }
+        
+        .upi-section {
+            margin-top: 15px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .worker-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .worker-item {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .worker-item:hover {
+            background: #f7fafc;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .worker-item.active {
+            background: #edf2f7;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .add-worker-form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row input {
+            flex: 1;
+        }
+        
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .success-message {
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .app-card {
+                padding: 20px;
+            }
+            
+            .attendance-row {
+                grid-template-columns: 70px 70px 90px 1fr;
+                gap: 8px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-card">
+            <!-- Login Section -->
+            <div id="loginSection" class="login-form">
+                <div class="header">
+                    <h1>मजदूर प्रबंधन सिस्टम</h1>
+                    <p>सुरक्षित लॉगिन के लिए मोबाइल नंबर डालें</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phoneNumber">मोबाइल नंबर:</label>
+                    <input type="tel" id="phoneNumber" placeholder="10 अंकों का मोबाइल नंबर" maxlength="10">
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+                
+                <button class="btn" id="sendOtpBtn" onclick="sendOTP()">OTP भेजें</button>
+                
+                <div id="otpSection" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="otpInput">OTP डालें:</label>
+                        <input type="text" id="otpInput" placeholder="6 अंकों का OTP" maxlength="6">
+                        <div id="otpError" class="error-message"></div>
+                    </div>
+                    <button class="btn" onclick="verifyOTP()">लॉगिन करें</button>
+                </div>
+            </div>
+
+            <!-- Main Application -->
+            <div id="mainApp" class="main-app hidden">
+                <!-- Navigation -->
+                <div class="nav-buttons">
+                    <button class="nav-btn active" onclick="showWorkerList()">मजदूर सूची</button>
+                    <button class="nav-btn" onclick="showAttendance()">हाजिरी</button>
+                    <button class="nav-btn" onclick="logout()">लॉगआउट</button>
+                </div>
+
+                <!-- Worker List Section -->
+                <div id="workerListSection">
+                    <div class="add-worker-form">
+                        <h3 style="margin-bottom: 15px;">नया मजदूर जोड़ें</h3>
+                        <div class="form-row">
+                            <input type="text" id="workerName" placeholder="मजदूर का नाम">
+                            <input type="tel" id="workerPhone" placeholder="मोबाइल नंबर" maxlength="10">
+                        </div>
+                        <div class="form-row">
+                            <input type="number" id="dailyWage" placeholder="दैनिक मजदूरी">
+                        </div>
+                        <button class="btn" onclick="addWorker()">मजदूर जोड़ें</button>
+                        <div id="workerMessage"></div>
+                    </div>
+                    
+                    <div class="worker-list" id="workerList">
+                        <!-- Workers will be listed here -->
+                    </div>
+                </div>
+
+                <!-- Attendance Section -->
+                <div id="attendanceSection" style="display: none;">
+                    <div id="workerDetails">
+                        <!-- Worker details and attendance will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let workers = [];
+        let currentWorker = null;
+        let attendanceData = {};
+
+        // Initialize app
+        function initApp() {
+            loadWorkersFromStorage();
+            loadAttendanceFromStorage();
+        }
+
+        // OTP Functions
+        function sendOTP() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const phoneError = document.getElementById('phoneError');
+            
+            if (!phoneNumber || phoneNumber.length !== 10 || !/^\d{10}$/.test(phoneNumber)) {
+                phoneError.textContent = 'कृपया 10 अंकों का सही मोबाइल नंबर डालें';
+                return;
+            }
+            
+            phoneError.textContent = '';
+            
+            // Simulate sending OTP
+            document.getElementById('otpSection').style.display = 'block';
+            document.getElementById('sendOtpBtn').textContent = 'OTP भेजा गया (डेमो: 123456)';
+            document.getElementById('sendOtpBtn').disabled = true;
+            
+            // For demo purposes, show the OTP
+            setTimeout(() => {
+                alert('डेमो OTP: 123456');
+            }, 1000);
+        }
+
+        function verifyOTP() {
+            const otpInput = document.getElementById('otpInput').value;
+            const otpError = document.getElementById('otpError');
+            
+            // For demo, accept 123456 as valid OTP
+            if (otpInput === '123456') {
+                otpError.textContent = '';
+                showMainApp();
+            } else {
+                otpError.textContent = 'गलत OTP, कृपया 123456 डालें (डेमो के लिए)';
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            initApp();
+        }
+
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            
+            // Reset login form
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('otpInput').value = '';
+            document.getElementById('otpSection').style.display = 'none';
+            document.getElementById('sendOtpBtn').textContent = 'OTP भेजें';
+            document.getElementById('sendOtpBtn').disabled = false;
+            document.getElementById('phoneError').textContent = '';
+            document.getElementById('otpError').textContent = '';
+        }
+
+        // Navigation Functions
+        function showWorkerList() {
+            document.getElementById('workerListSection').style.display = 'block';
+            document.getElementById('attendanceSection').style.display = 'none';
+            updateNavButtons('workerList');
+            renderWorkerList();
+        }
+
+        function showAttendance() {
+            if (!currentWorker) {
+                alert('पहले मजदूर सूची से कोई मजदूर चुनें (मजदूर के नाम पर क्लिक करें)');
+                showWorkerList();
+                return;
+            }
+            
+            document.getElementById('workerListSection').style.display = 'none';
+            document.getElementById('attendanceSection').style.display = 'block';
+            updateNavButtons('attendance');
+            renderAttendanceSheet();
+        }
+
+        function updateNavButtons(active) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (active === 'workerList') {
+                buttons[0].classList.add('active');
+            } else if (active === 'attendance') {
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Worker Management Functions
+        function addWorker() {
+            const name = document.getElementById('workerName').value.trim();
+            const phone = document.getElementById('workerPhone').value.trim();
+            const wage = parseFloat(document.getElementById('dailyWage').value);
+            const message = document.getElementById('workerMessage');
+            
+            if (!name || !wage || wage <= 0) {
+                message.innerHTML = '<div class="error-message">कृपया नाम और वैध मजदूरी डालें</div>';
+                return;
+            }
+            
+            if (phone && (phone.length !== 10 || !/^\d{10}$/.test(phone))) {
+                message.innerHTML = '<div class="error-message">कृपया 10 अंकों का सही मोबाइल नंबर डालें</div>';
+                return;
+            }
+            
+            const newWorker = {
+                id: Date.now(),
+                name: name,
+                phone: phone || null,
+                dailyWage: wage,
+                createdDate: new Date().toISOString()
+            };
+            
+            workers.push(newWorker);
+            attendanceData[newWorker.id] = [];
+            
+            saveWorkersToStorage();
+            saveAttendanceToStorage();
+            
+            document.getElementById('workerName').value = '';
+            document.getElementById('workerPhone').value = '';
+            document.getElementById('dailyWage').value = '';
+            message.innerHTML = '<div class="success-message">मजदूर सफलतापूर्वक जोड़ा गया</div>';
+            
+            setTimeout(() => {
+                message.innerHTML = '';
+            }, 3000);
+            
+            renderWorkerList();
+        }
+
+        function selectWorker(workerId) {
+            currentWorker = workers.find(w => w.id === workerId);
+            
+            // Update UI to show selected worker
+            const workerItems = document.querySelectorAll('.worker-item');
+            workerItems.forEach(item => item.classList.remove('active'));
+            document.getElementById(`worker-${workerId}`).classList.add('active');
+            
+            // Show success message
+            const message = document.getElementById('workerMessage');
+            message.innerHTML = `<div class="success-message">${currentWorker.name} चुना गया। अब हाजिरी टैब पर जाएं।</div>`;
+            
+            setTimeout(() => {
+                message.innerHTML = '';
+            }, 3000);
+        }
+
+        function renderWorkerList() {
+            const workerList = document.getElementById('workerList');
+            
+            if (workers.length === 0) {
+                workerList.innerHTML = '<p style="text-align: center; color: #718096;">कोई मजदूर नहीं मिला। कृपया पहले मजदूर जोड़ें।</p>';
+                return;
+            }
+            
+            workerList.innerHTML = workers.map(worker => {
+                const workerAttendance = attendanceData[worker.id] || [];
+                const totalDays = workerAttendance.length;
+                const totalAttendance = workerAttendance.reduce((sum, day) => sum + (day.attendance || 0), 0);
+                const totalExpenses = workerAttendance.reduce((sum, day) => sum + (day.expense || 0), 0);
+                const totalBalance = (totalAttendance * worker.dailyWage) - totalExpenses;
+                
+                return `
+                    <div class="worker-item" id="worker-${worker.id}" onclick="selectWorker(${worker.id})" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 16px;">${worker.name}</div>
+                                <div style="color: #718096; font-size: 14px;">दैनिक मजदूरी: ₹${worker.dailyWage}</div>
+                                ${worker.phone ? `<div style="color: #667eea; font-size: 13px;">📱 ${worker.phone}</div>` : ''}
+                                <div style="color: #667eea; font-size: 12px; margin-top: 5px;">👆 हाजिरी देखने के लिए क्लिक करें</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #38a169; font-weight: bold; font-size: 18px;">₹${totalBalance}</div>
+                                <div style="font-size: 12px; color: #718096;">${totalDays} दिन, ${totalAttendance} हाजिरी</div>
+                                ${worker.phone ? `<button onclick="sendNotification(${worker.id}); event.stopPropagation();" style="background: #48bb78; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-top: 5px; cursor: pointer;">📧 SMS भेजें</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Attendance Functions
+        function renderAttendanceSheet() {
+            if (!currentWorker) return;
+            
+            const workerDetails = document.getElementById('workerDetails');
+            const workerAttendance = attendanceData[currentWorker.id] || [];
+            
+            // Calculate summary
+            const totalDays = workerAttendance.length;
+            const totalAttendance = workerAttendance.reduce((sum, day) => sum + (day.attendance || 0), 0);
+            const totalExpenses = workerAttendance.reduce((sum, day) => sum + (day.expense || 0), 0);
+            const totalEarned = totalAttendance * currentWorker.dailyWage;
+            const totalBalance = totalEarned - totalExpenses;
+            
+            // Get last 15 days including today
+            const last15Days = getLast15Days();
+            
+            workerDetails.innerHTML = `
+                <div class="worker-header">
+                    <div>
+                        <div class="worker-name">${currentWorker.name}</div>
+                        <div class="daily-wage">दैनिक मजदूरी: ₹${currentWorker.dailyWage}</div>
+                        ${currentWorker.phone ? `<div style="color: #667eea; font-size: 14px;">📱 ${currentWorker.phone}</div>` : ''}
+                    </div>
+                    ${currentWorker.phone ? `<button onclick="sendNotification(${currentWorker.id})" style="background: #48bb78; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">📧 SMS भेजें</button>` : ''}
+                </div>
+                
+                <div style="background: #f7fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 80px 80px 100px 1fr; gap: 10px; font-weight: bold; font-size: 14px; color: #4a5568;">
+                        <div>तारीख</div>
+                        <div>हाजिरी</div>
+                        <div>खर्चा</div>
+                        <div style="text-align: right;">बैलेंस</div>
+                    </div>
+                </div>
+                
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${last15Days.map(date => {
+                        const dateStr = date.toISOString().split('T')[0];
+                        const existingRecord = workerAttendance.find(record => record.date === dateStr);
+                        const attendance = existingRecord ? existingRecord.attendance : 0;
+                        const expense = existingRecord ? existingRecord.expense : 0;
+                        const dayBalance = (attendance * currentWorker.dailyWage) - expense;
+                        
+                        return `
+                            <div class="attendance-row">
+                                <div class="date-cell">${formatDate(date)}</div>
+                                <div>
+                                    <input type="number" 
+                                           class="attendance-input" 
+                                           value="${attendance}" 
+                                           min="0" 
+                                           max="2" 
+                                           step="0.5"
+                                           onchange="updateAttendance('${dateStr}', 'attendance', this.value)">
+                                </div>
+                                <div>
+                                    <input type="number" 
+                                           class="expense-input" 
+                                           value="${expense}" 
+                                           min="0"
+                                           onchange="updateAttendance('${dateStr}', 'expense', this.value)">
+                                </div>
+                                <div class="balance-cell">₹${dayBalance}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="summary-section">
+                    <div class="summary-row">
+                        <span>कुल दिन:</span>
+                        <span>${totalDays} दिन</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>कुल हाजिरी:</span>
+                        <span>${totalAttendance}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>कुल कमाई:</span>
+                        <span>₹${totalEarned}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>कुल खर्चा:</span>
+                        <span>₹${totalExpenses}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>कुल बैलेंस:</span>
+                        <span>₹${totalBalance}</span>
+                    </div>
+                </div>
+                
+                <div class="payment-section">
+                    <h4 style="margin-bottom: 15px;">पेमेंट करें</h4>
+                    <div class="payment-methods">
+                        <button class="payment-btn active" onclick="selectPaymentMethod('cash')">कैश</button>
+                        <button class="payment-btn" onclick="selectPaymentMethod('upi')">UPI</button>
+                    </div>
+                    
+                    <div>
+                        <input type="number" id="paymentAmount" placeholder="राशि डालें" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; margin-bottom: 10px;">
+                        <button class="btn" onclick="makePayment()" style="background: #38a169;">पेमेंट करें</button>
+                    </div>
+                    
+                    <div id="upiSection" style="display: none; margin-top: 15px;">
+                        <input type="text" id="upiId" placeholder="UPI ID (वैकल्पिक)" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px;">
+                        <p style="font-size: 12px; color: #718096; margin-top: 5px;">UPI ID नहीं है तो कैश पेमेंट करें</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateAttendance(date, field, value) {
+            if (!currentWorker) return;
+            
+            const workerAttendance = attendanceData[currentWorker.id] || [];
+            let existingRecord = workerAttendance.find(record => record.date === date);
+            
+            if (!existingRecord) {
+                existingRecord = { date: date, attendance: 0, expense: 0 };
+                workerAttendance.push(existingRecord);
+                attendanceData[currentWorker.id] = workerAttendance;
+            }
+            
+            existingRecord[field] = parseFloat(value) || 0;
+            
+            saveAttendanceToStorage();
+            renderAttendanceSheet(); // Re-render to update calculations
+            
+            // Auto-send notification if phone number exists and attendance is updated
+            if (currentWorker.phone && field === 'attendance' && value > 0) {
+                setTimeout(() => {
+                    sendNotification(currentWorker.id, true); // true for auto notification
+                }, 1000);
+            }
+        }
+
+        function selectPaymentMethod(method) {
+            const buttons = document.querySelectorAll('.payment-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const upiSection = document.getElementById('upiSection');
+            if (method === 'upi') {
+                upiSection.style.display = 'block';
+            } else {
+                upiSection.style.display = 'none';
+            }
+        }
+
+        function makePayment() {
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const activePaymentMethod = document.querySelector('.payment-btn.active').textContent;
+            
+            if (!amount || amount <= 0) {
+                alert('कृपया वैध राशि डालें');
+                return;
+            }
+            
+            if (activePaymentMethod === 'UPI') {
+                const upiId = document.getElementById('upiId').value.trim();
+                if (upiId) {
+                    alert(`UPI पेमेंट: ₹${amount}\nUPI ID: ${upiId}\n(यह डेमो है, वास्तविक पेमेंट नहीं हुई)`);
+                } else {
+                    alert('UPI ID डालें या कैश पेमेंट चुनें');
+                    return;
+                }
+            } else {
+                alert(`कैश पेमेंट: ₹${amount}\n(रिकॉर्ड रख लिया गया)`);
+            }
+            
+            // Record payment as expense for today
+            const today = new Date().toISOString().split('T')[0];
+            const workerAttendance = attendanceData[currentWorker.id] || [];
+            let todayRecord = workerAttendance.find(record => record.date === today);
+            
+            if (!todayRecord) {
+                todayRecord = { date: today, attendance: 0, expense: 0 };
+                workerAttendance.push(todayRecord);
+                attendanceData[currentWorker.id] = workerAttendance;
+            }
+            
+            todayRecord.expense = (todayRecord.expense || 0) + amount;
+            
+            saveAttendanceToStorage();
+            document.getElementById('paymentAmount').value = '';
+            renderAttendanceSheet();
+        }
+
+        // Notification Functions
+        function sendNotification(workerId, isAuto = false) {
+            const worker = workers.find(w => w.id === workerId);
+            if (!worker || !worker.phone) {
+                alert('इस मजदूर का मोबाइल नंबर नहीं है');
+                return;
+            }
+            
+            const workerAttendance = attendanceData[worker.id] || [];
+            const totalDays = workerAttendance.length;
+            const totalAttendance = workerAttendance.reduce((sum, day) => sum + (day.attendance || 0), 0);
+            const totalExpenses = workerAttendance.reduce((sum, day) => sum + (day.expense || 0), 0);
+            const totalEarned = totalAttendance * worker.dailyWage;
+            const totalBalance = totalEarned - totalExpenses;
+            
+            const today = new Date().toLocaleDateString('hi-IN');
+            const todayRecord = workerAttendance.find(record => record.date === new Date().toISOString().split('T')[0]);
+            const todayAttendance = todayRecord ? todayRecord.attendance : 0;
+            const todayExpense = todayRecord ? todayRecord.expense : 0;
+            
+            const message = `
+🏗️ हाजिरी अपडेट - ${worker.name}
+📅 दिनांक: ${today}
+⏰ आज की हाजिरी: ${todayAttendance} दिन
+💰 आज का खर्चा: ₹${todayExpense}
+
+📊 कुल विवरण:
+📈 कुल दिन: ${totalDays}
+✅ कुल हाजिरी: ${totalAttendance} दिन
+💵 कुल कमाई: ₹${totalEarned}
+🛒 कुल खर्चा: ₹${totalExpenses}
+💳 शेष राशि: ₹${totalBalance}
+
+धन्यवाद! 🙏
+            `.trim();
+            
+            if (isAuto) {
+                // Show auto notification popup
+                showNotificationPopup(`📱 ऑटो SMS भेजा गया!\n\n${worker.name} (${worker.phone}) को हाजिरी अपडेट का SMS भेजा गया।`, 'success');
+            } else {
+                // Show manual notification with full message
+                const confirmSend = confirm(`${worker.name} (${worker.phone}) को यह SMS भेजना चाहते हैं?\n\n${message}`);
+                
+                if (confirmSend) {
+                    showNotificationPopup(`📱 SMS भेजा गया!\n\n${worker.name} को विस्तृत हाजिरी रिपोर्ट भेजी गई।`, 'success');
+                }
+            }
+        }
+        
+        function showNotificationPopup(message, type) {
+            // Create popup element
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#48bb78' : '#f56565'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 1000;
+                max-width: 300px;
+                font-size: 14px;
+                line-height: 1.4;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            popup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>${message.replace(/\n/g, '<br>')}</div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: 10px;">×</button>
+                </div>
+            `;
+            
+            // Add animation CSS
+            if (!document.getElementById('notificationCSS')) {
+                const style = document.createElement('style');
+                style.id = 'notificationCSS';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(popup);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (popup.parentElement) {
+                    popup.remove();
+                }
+            }, 5000);
+        }
+        function getLast15Days() {
+            const days = [];
+            const today = new Date();
+            
+            for (let i = 14; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                days.push(date);
+            }
+            
+            return days;
+        }
+
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            return `${day}/${month}`;
+        }
+
+        // Storage Functions
+        function saveWorkersToStorage() {
+            const data = { workers: workers };
+            window.workersData = data;
+        }
+
+        function loadWorkersFromStorage() {
+            if (window.workersData) {
+                workers = window.workersData.workers || [];
+            }
+        }
+
+        function saveAttendanceToStorage() {
+            const data = { attendanceData: attendanceData };
+            window.attendanceDataStore = data;
+        }
+
+        function loadAttendanceFromStorage() {
+            if (window.attendanceDataStore) {
+                attendanceData = window.attendanceDataStore.attendanceData || {};
+            }
+        }
+
+        // Initialize with demo data if no workers exist
+        function initializeDemoData() {
+            if (workers.length === 0) {
+                const demoWorker = {
+                    id: Date.now(),
+                    name: "राम कुमार",
+                    phone: "9876543210",
+                    dailyWage: 500,
+                    createdDate: new Date().toISOString()
+                };
+                
+                workers.push(demoWorker);
+                attendanceData[demoWorker.id] = [
+                    { date: new Date().toISOString().split('T')[0], attendance: 1, expense: 0 }
+                ];
+                
+                saveWorkersToStorage();
+                saveAttendanceToStorage();
+            }
+        }
+
+        // Utility Functions
+
+        // Initialize demo data when app loads
+        window.onload = function() {
+            setTimeout(initializeDemoData, 1000);
+        };
+    </script>
+</body>
+</html>
