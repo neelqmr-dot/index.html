@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मजदूर प्रबंधन सिस्टम</title>
+    <style>
+        * {margin:0; padding:0; box-sizing:border-box;}
+        body {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh; color:#333;
+        }
+        .container {max-width:500px;margin:0 auto;padding:20px;min-height:100vh;
+            display:flex;align-items:center;justify-content:center;}
+        .app-card {
+            background:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);
+            padding:30px;width:100%;max-width:450px;
+        }
+        .header{text-align:center;margin-bottom:30px;}
+        .header h1{color:#2d3748;font-size:24px;margin-bottom:10px;}
+        .login-form.hidden,.main-app.hidden{display:none;}
+        .form-group{margin-bottom:20px;}
+        label{display:block;margin-bottom:8px;font-weight:600;color:#4a5568;}
+        input[type="tel"],input[type="text"],input[type="number"] {
+            width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:16px;
+        }
+        .btn{width:100%;padding:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;}
+        .btn:hover{transform:translateY(-2px);}
+        .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+        .nav-buttons{display:flex;gap:10px;margin-top:20px;}
+        .nav-btn{flex:1;padding:10px;border:2px solid #667eea;background:white;
+            color:#667eea;border-radius:8px;cursor:pointer;font-weight:600;}
+        .nav-btn.active{background:#667eea;color:white;}
+        .worker-list{max-height:400px;overflow-y:auto;}
+        .worker-item{padding:15px;border:2px solid #e2e8f0;border-radius:8px;margin-bottom:10px;
+            cursor:pointer;background:white;}
+        .worker-item:hover{background:#f7fafc;border-color:#667eea;}
+        .worker-item.active{background:#edf2f7;border-color:#667eea;}
+        .error-message{color:#e53e3e;font-size:14px;margin-top:5px;}
+        .success-message{color:#38a169;font-size:14px;margin-top:5px;}
+        .summary-section{margin-top:20px;padding:15px;background:#edf2f7;border-radius:10px;}
+        .summary-row{display:flex;justify-content:space-between;margin-bottom:8px;}
+        .summary-row:last-child{margin-bottom:0;font-weight:bold;font-size:16px;color:#2d3748;
+            border-top:1px solid #cbd5e0;padding-top:8px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="app-card">
+        <!-- Language Toggle -->
+        <div style="text-align:right;margin-bottom:10px;">
+            <button class="btn" style="width:auto;padding:6px 12px;" onclick="toggleLanguage()">🌐 Change Language</button>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-form">
+            <div class="header">
+                <h1>मजदूर प्रबंधन सिस्टम</h1>
+                <p>सुरक्षित लॉगिन के लिए मोबाइल नंबर डालें</p>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">मोबाइल नंबर:</label>
+                <input type="tel" id="phoneNumber" placeholder="10 अंकों का मोबाइल नंबर" maxlength="10">
+                <div id="phoneError" class="error-message"></div>
+            </div>
+            <button class="btn" id="sendOtpBtn" onclick="sendOTP()">OTP भेजें</button>
+            <div id="otpSection" style="display:none; margin-top:20px;">
+                <div class="form-group">
+                    <label for="otpInput">OTP डालें:</label>
+                    <input type="text" id="otpInput" placeholder="6 अंकों का OTP" maxlength="6">
+                    <div id="otpError" class="error-message"></div>
+                </div>
+                <button class="btn" onclick="verifyOTP()">लॉगिन करें</button>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp" class="main-app hidden">
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showWorkerList()">मजदूर सूची</button>
+                <button class="nav-btn" onclick="showAttendance()">हाजिरी</button>
+                <button class="nav-btn" onclick="logout()">लॉगआउट</button>
+            </div>
+            <div id="workerListSection">
+                <div class="add-worker-form">
+                    <h3 style="margin-bottom:15px;">नया मजदूर जोड़ें</h3>
+                    <div class="form-row">
+                        <input type="text" id="workerName" placeholder="मजदूर का नाम">
+                        <input type="tel" id="workerPhone" placeholder="मोबाइल नंबर" maxlength="10">
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="dailyWage" placeholder="दैनिक मजदूरी">
+                    </div>
+                    <button class="btn" onclick="addWorker()">मजदूर जोड़ें</button>
+                    <div id="workerMessage"></div>
+                </div>
+                <div class="worker-list" id="workerList"></div>
+            </div>
+            <div id="attendanceSection" style="display:none;">
+                <div id="workerDetails"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let workers = [], currentWorker=null, attendanceData={};
+    let currentLang="hi";
+    const lang={
+        hi:{
+            title:"मजदूर प्रबंधन सिस्टम",loginText:"सुरक्षित लॉगिन के लिए मोबाइल नंबर डालें",
+            phoneLabel:"मोबाइल नंबर:",otpLabel:"OTP डालें:",sendOtp:"OTP भेजें",loginBtn:"लॉगिन करें",
+            workerList:"मजदूर सूची",attendance:"हाजिरी",logout:"लॉगआउट",addWorker:"नया मजदूर जोड़ें",
+            dailyWage:"दैनिक मजदूरी",monthlySalary:"मासिक सैलरी"
+        },
+        en:{
+            title:"Worker Management System",loginText:"Enter mobile number for secure login",
+            phoneLabel:"Mobile Number:",otpLabel:"Enter OTP:",sendOtp:"Send OTP",loginBtn:"Login",
+            workerList:"Worker List",attendance:"Attendance",logout:"Logout",addWorker:"Add New Worker",
+            dailyWage:"Daily Wage",monthlySalary:"Monthly Salary"
+        }
+    };
+
+    function toggleLanguage(){currentLang=currentLang==="hi"?"en":"hi";applyLanguage();}
+    function applyLanguage(){
+        const t=lang[currentLang];
+        document.querySelector(".header h1").textContent=t.title;
+        document.querySelector(".header p").textContent=t.loginText;
+        document.querySelector("label[for='phoneNumber']").textContent=t.phoneLabel;
+        document.querySelector("label[for='otpInput']").textContent=t.otpLabel;
+        document.getElementById("sendOtpBtn").textContent=t.sendOtp;
+        document.querySelector("#otpSection button").textContent=t.loginBtn;
+        const navBtns=document.querySelectorAll(".nav-btn");
+        if(navBtns.length>=3){navBtns[0].textContent=t.workerList;navBtns[1].textContent=t.attendance;navBtns[2].textContent=t.logout;}
+        document.querySelector(".add-worker-form h3").textContent=t.addWorker;
+        renderWorkerList();
+    }
+    window.onload=()=>{applyLanguage();};
+
+    function sendOTP(){
+        const phone=document.getElementById("phoneNumber").value,phoneError=document.getElementById("phoneError");
+        if(!phone||phone.length!==10||!/^\d{10}$/.test(phone)){phoneError.textContent="कृपया 10 अंकों का सही मोबाइल नंबर डालें";return;}
+        phoneError.textContent="";document.getElementById("otpSection").style.display="block";
+        document.getElementById("sendOtpBtn").textContent="OTP भेजा गया (डेमो:123456)";
+        document.getElementById("sendOtpBtn").disabled=true;setTimeout(()=>{alert("डेमो OTP:123456");},1000);
+    }
+    function verifyOTP(){
+        const otp=document.getElementById("otpInput").value,otpError=document.getElementById("otpError");
+        if(otp==="123456"){otpError.textContent="";showMainApp();}else{otpError.textContent="गलत OTP, कृपया 123456 डालें";}
+    }
+    function showMainApp(){document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("mainApp").classList.remove("hidden");renderWorkerList();}
+    function logout(){document.getElementById("loginSection").classList.remove("hidden");
+        document.getElementById("mainApp").classList.add("hidden");}
+
+    function showWorkerList(){document.getElementById("workerListSection").style.display="block";
+        document.getElementById("attendanceSection").style.display="none";renderWorkerList();}
+    function showAttendance(){if(!currentWorker){alert("पहले मजदूर चुनें");return;}
+        document.getElementById("workerListSection").style.display="none";
+        document.getElementById("attendanceSection").style.display="block";renderAttendanceSheet();}
+
+    function addWorker(){
+        const name=document.getElementById("workerName").value.trim();
+        const phone=document.getElementById("workerPhone").value.trim();
+        const wage=parseFloat(document.getElementById("dailyWage").value);
+        const msg=document.getElementById("workerMessage");
+        if(!name||!wage||wage<=0){msg.innerHTML="<div class='error-message'>कृपया नाम और मजदूरी डालें</div>";return;}
+        if(phone&&(phone.length!==10||!/^\d{10}$/.test(phone))){msg.innerHTML="<div class='error-message'>कृपया सही मोबाइल नंबर डालें</div>";return;}
+        const newWorker={id:Date.now(),name,phone:phone||null,dailyWage:wage};workers.push(newWorker);
+        attendanceData[newWorker.id]=[];msg.innerHTML="<div class='success-message'>Worker Added</div>";
+        setTimeout(()=>{msg.innerHTML="";},2000);renderWorkerList();
+        document.getElementById("workerName").value="";document.getElementById("workerPhone").value="";
+        document.getElementById("dailyWage").value="";
+    }
+    function selectWorker(id){currentWorker=workers.find(w=>w.id===id);renderAttendanceSheet();}
+
+    function renderWorkerList(){
+        const list=document.getElementById("workerList");
+        if(workers.length===0){list.innerHTML="<p style='text-align:center;color:#718096;'>No workers</p>";return;}
+        list.innerHTML=workers.map(w=>`
+            <div class="worker-item" onclick="selectWorker(${w.id})">
+                <div><b>${w.name}</b><br>
+                ${lang[currentLang].dailyWage}: ₹${w.dailyWage} | ${lang[currentLang].monthlySalary}: ₹${w.dailyWage*30}
+                </div>
+            </div>`).join("");
+    }
+    function renderAttendanceSheet(){
+        if(!currentWorker)return;
+        document.getElementById("workerDetails").innerHTML=`
+            <div class="worker-header">
+                <div class="worker-name">${currentWorker.name}</div>
+                <div>${lang[currentLang].dailyWage}: ₹${currentWorker.dailyWage}</div>
+                <div>${lang[currentLang].monthlySalary}: ₹${currentWorker.dailyWage*30}</div>
+            </div>
+            <div class="summary-section">
+                <div class="summary-row"><span>${lang[currentLang].dailyWage}:</span><span>₹${currentWorker.dailyWage}</span></div>
+                <div class="summary-row"><span>${lang[currentLang].monthlySalary} (Est.):</span><span>₹${currentWorker.dailyWage*30}</span></div>
+            </div>`;
+    }
+</script>
+</body>
+</html>
