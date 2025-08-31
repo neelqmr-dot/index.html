@@ -936,4 +936,100 @@
         };
     </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मजदूर प्रबंधन सिस्टम</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .salary-box {
+            background: #e3ffe3;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Language Change -->
+    <div style="text-align:right;">
+        <label for="language">🌐 Language:</label>
+        <select id="language" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+        </select>
+    </div>
+
+    <h1 id="titleText">Worker Management System</h1>
+
+    <div class="container">
+        <form>
+            <label id="nameLabel" for="name">Name:</label>
+            <input type="text" id="name" placeholder="Enter worker name">
+
+            <label id="workLabel" for="work">Work Type:</label>
+            <input type="text" id="work" placeholder="Enter work type">
+
+            <!-- Monthly Salary Fixed -->
+            <label id="salaryLabel" for="salary">Monthly Salary:</label>
+            <input type="number" id="salary" value="15000" readonly>
+            <div class="salary-box" id="salaryText">Fixed Salary: ₹15000</div>
+
+            <button type="submit" id="submitBtn">Submit</button>
+        </form>
+    </div>
+
+<script>
+function changeLanguage() {
+    let lang = document.getElementById("language").value;
+
+    if(lang === "hi"){
+        document.getElementById("titleText").innerText = "मजदूर प्रबंधन सिस्टम";
+        document.getElementById("nameLabel").innerText = "नाम:";
+        document.getElementById("workLabel").innerText = "काम का प्रकार:";
+        document.getElementById("salaryLabel").innerText = "मासिक वेतन:";
+        document.getElementById("salaryText").innerText = "निश्चित वेतन: ₹15000";
+        document.getElementById("submitBtn").innerText = "जमा करें";
+    } else {
+        document.getElementById("titleText").innerText = "Worker Management System";
+        document.getElementById("nameLabel").innerText = "Name:";
+        document.getElementById("workLabel").innerText = "Work Type:";
+        document.getElementById("salaryLabel").innerText = "Monthly Salary:";
+        document.getElementById("salaryText").innerText = "Fixed Salary: ₹15000";
+        document.getElementById("submitBtn").innerText = "Submit";
+    }
+}
+</script>
+
+</body>
 </html>
